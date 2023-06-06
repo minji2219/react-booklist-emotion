@@ -1,0 +1,57 @@
+import styled from '@emotion/styled'
+import React, { useState } from 'react'
+import BookSearchForm from '../components/BookSearchForm'
+import axios from 'axios'
+import Loader from '../components/Loader'
+import BookList from '../components/BookList'
+import { Container, Header, HeaderContainer, LogoText } from '../components/Shared'
+
+const HeaderSearchForm=styled.div`
+  margin-left:auto;
+`
+
+const SearchPage = () => {
+
+  const [searchTerm,setSearchTerm] = useState('')
+  const[books,setBooks]=useState({})
+  const[loading,setLoading]=useState(false)
+
+  const API_BASE_URL=`https://www.googleapis.com/books`
+  const fetchBooks=async()=>{
+    setLoading(true);
+    try{
+      const result= await axios.get(`${API_BASE_URL}/v1/volumes?q=${searchTerm}`)
+      setBooks(result.data)
+    }catch(error){
+      console.log("error는",error)
+    }
+    setLoading(false)
+  }
+  const handleChange=e=>{
+    setSearchTerm(e.target.value)
+  }
+  const handleSubmit=e=>{
+    e.preventDefault()
+    fetchBooks()
+  }
+  return (
+    <div>
+      <Header>
+        <HeaderContainer>
+          <LogoText>Book List</LogoText>
+          <HeaderSearchForm>
+            <BookSearchForm handleChange={handleChange} handleSubmit={handleSubmit} searchTerm={searchTerm}/>
+          </HeaderSearchForm>
+        </HeaderContainer>
+      </Header>
+      <Container>
+        <Loader loading={loading}>
+          "<strong>{searchTerm}</strong>" 책을 찾고 있습니다.
+        </Loader>
+        <BookList books={books}/>
+      </Container>
+    </div>
+  )
+}
+
+export default SearchPage
